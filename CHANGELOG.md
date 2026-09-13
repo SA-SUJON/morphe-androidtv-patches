@@ -1,3 +1,10 @@
+## [1.35.2](https://github.com/ajstrick81/morphe-androidtv-patches/compare/v1.35.1...v1.35.2) (2026-09-13)
+
+
+### Bug Fixes
+
+* **disney:** support v26.16.0 — make pause-ad seam optional ([#167](https://github.com/ajstrick81/morphe-androidtv-patches/issues/167)) ([3ae1c2a](https://github.com/ajstrick81/morphe-androidtv-patches/commit/3ae1c2a8166d7fbc2222c07c72f607ba81032fbe))
+
 ## [1.35.1](https://github.com/ajstrick81/morphe-androidtv-patches/compare/v1.35.0...v1.35.1) (2026-09-09)
 
 
