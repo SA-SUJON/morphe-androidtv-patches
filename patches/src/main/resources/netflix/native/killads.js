@@ -45,6 +45,37 @@ function patchADV(rs){ if(advDone)return; var p=pat(ADV_ANCHOR);
   for(var i=0;i<rs.length;i++){var r=rs[i];if(r.size>128*1024*1024)continue;
     try{var h=Memory.scanSync(r.base,r.size,p);for(var j=0;j<h.length;j++){var t=h[j].address.add(ADV_OFF);var cur=null;try{cur=t.readCString(2);}catch(e){}if(cur!==ADV_EXP)continue;Memory.protect(t,2,'rw-');t.writeByteArray([0x5b,0x5d]);advDone=true;L('PATCH ADV: adverts.adBreaks source ba.map->[].map (empty all ad breaks) @'+t);}}catch(e){}}
 }
+// ---------- (ADVw) wildcard-tolerant ADV fallback (2026-09-13, experimental — #166) ----------
+// The adverts.adBreaks normaliser re-minified alongside getAdMetadata, so the exact ADV anchor
+// (:ba.map(...ea.normalize) scan-misses. Closing this matters: getAdMetadata's NEW middle branch
+// `else if(a.adverts&&a.adverts.adBreaks.length)b=a.adverts.adBreaks.map(...)` rebuilds ad breaks
+// from adverts.adBreaks when M1 forces if(0) — emptying adverts.adBreaks at the normaliser makes
+// that guard false so the branch is skipped (-> else b=[]). Re-anchor by the STABLE tokens
+// (.map(function( ... .normalize) and wildcard the churny map-source var. Only the ORIGINAL
+// `<2char>.map->[].map` shape is safe to write length-preservingly; any other layout -> dump, no write.
+var advwDone=false, advDumped=false;
+function patchADVw(rs){ if(advDone||advwDone)return;
+  // <var>.map(function(  where <var> is the adBreaks source (2 bytes in the minified normaliser)
+  var p=' ?? ?? '+pat('.map(function('); // 2 wildcard bytes (var) then .map(function(
+  for(var i=0;i<rs.length;i++){var r=rs[i];if(r.size>128*1024*1024)continue;
+    try{var h=Memory.scanSync(r.base,r.size,p);
+      for(var j=0;j<h.length;j++){ var vAddr=h[j].address; // start = the 2 var bytes
+        var v0=-1,v1=-1;try{v0=vAddr.readU8();v1=vAddr.add(1).readU8();}catch(e){continue;}
+        if(!isAlpha(v0)||!isAlpha(v1))continue;
+        // disambiguate: this must be the adverts normaliser map -> '.normalize' must follow shortly.
+        var fwd=null;try{fwd=vAddr.readCString(90);}catch(e){}
+        if(fwd==null||fwd.indexOf('.normalize')<0)continue;
+        Memory.protect(vAddr,2,'rw-');vAddr.writeByteArray([0x5b,0x5d]);advwDone=true;
+        L('PATCH ADVw: adverts.adBreaks source "'+String.fromCharCode(v0)+String.fromCharCode(v1)+'".map->[].map (empty all ad breaks, rename-tolerant) @'+vAddr);
+        return;
+      }
+    }catch(e){}}
+  // not found the safe 2-char shape -> dump the normaliser region once for precise re-anchor.
+  if(!advDumped){ var mk='.normalize',mp=pat(mk),hit=0;
+    for(var i2=0;i2<rs.length&&hit<3;i2++){var r2=rs[i2];if(r2.size>128*1024*1024)continue;
+      try{var h2=Memory.scanSync(r2.base,r2.size,mp);for(var j2=0;j2<h2.length&&hit<3;j2++){var a2=h2[j2].address,ctx=null;try{ctx=a2.sub(150).readCString(230);}catch(e){}if(ctx==null||ctx.indexOf('.map(function')<0)continue;hit++;advDumped=true;L('ADVw DUMP@'+a2+' ctx='+JSON.stringify(ctx));}}catch(e){}}
+  }
+}
 // ---------- (DAI) dynamic ad-insertion bypass — belt-and-suspenders alongside ADV ----------
 //   a.prototype.applyDaiPrefetch=function(a,b){ b=this.getDaiPrefetcher(b);
 //     var e=(b==null)?void 0:b.getAds();
@@ -410,7 +441,7 @@ var tries=0;
 function apply(){ tries++; var rs=Process.enumerateRanges('rw-');
   var loaded=false,gp=pat('nrdp.gibbon');
   for(var i=0;i<rs.length&&!loaded;i++){if(rs[i].size>128*1024*1024)continue;try{if(Memory.scanSync(rs[i].base,rs[i].size,gp).length)loaded=true;}catch(e){}}
-  if(loaded){patchA(rs);patchA2(rs);patchADV(rs);patchDAI(rs);patchMASTER(rs);if(!masterDone)patchMASTERw(rs);patchB(rs);patchFP(rs);patchGAID(rs);patchHH(rs);neuterMhuRenders(rs);patchCLCS(rs);}
+  if(loaded){patchA(rs);patchA2(rs);patchADV(rs);if(!advDone)patchADVw(rs);patchDAI(rs);patchMASTER(rs);if(!masterDone)patchMASTERw(rs);patchB(rs);patchFP(rs);patchGAID(rs);patchHH(rs);neuterMhuRenders(rs);patchCLCS(rs);}
   // Keep polling until applied. The ad-insertion source (ADV/DAI) and prepareAdBreakStates (A)
   // can load LATER than the pause module (B) — sometimes only once playback is exercised — so we
   // must NOT give up early. WRITE-ONCE per patch (done guards) — not a re-patch loop.
