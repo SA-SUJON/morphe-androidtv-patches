@@ -115,9 +115,71 @@ function patchMASTER(rs){ if(masterDone)return;
 // as soon as both edits land. Mirrors fastHH.
 var _fastMn=0;
 function fastMASTER(){ if(masterDone)return; _fastMn++;
-  try{ patchMASTER(Process.enumerateRanges('rw-')); }catch(e){}
-  if(masterDone){ L('fastMASTER: applied by pass '+_fastMn); return; }
+  try{ var _rm=Process.enumerateRanges('rw-'); patchMASTER(_rm); if(!masterDone) patchMASTERw(_rm); }catch(e){}
+  if(masterDone){ L('fastMASTER: applied by pass '+_fastMn+(mwDone?' (wildcard fallback)':'')); return; }
   if(_fastMn<500) setTimeout(fastMASTER, 120);   // ~60s of tight scanning
+}
+// ---------- (MASTERw) wildcard-tolerant MASTER fallback (2026-09-13, experimental — issue #166) --
+// Most Netflix "server-side" ad drift is just a re-minify that RENAMES single-char locals, which
+// makes the exact-string MASTER anchors scan-miss and the kill silently no-op (#166: KILLMARK=0
+// while rawRealPods>0). This fallback re-matches getAdMetadata by its STABLE API tokens (getAds /
+// adBreakHydrator) and WILDCARDS the churny locals, so a pure rename no longer breaks us. Additive:
+// only runs when the exact patchMASTER missed (masterDone=false), so builds where the exact anchors
+// still hit are unchanged. Reads the REAL accumulator var before writing (never hardcodes 'b') to
+// avoid the v1 wrong-var crash. Length-preserving, verify-before-write.
+function isAlpha(cc){ return (cc>=97&&cc<=122)||(cc>=65&&cc<=90); }   // a-z A-Z (minified local)
+var mwDone=false, mwDumped=false;
+// ATOMIC: locate BOTH the M1 (if-guard) and M2 (else-return) edit sites BEFORE writing EITHER, so we
+// can never leave M1 flipped without M2 (that is the v1 `if(0)...else return;`->undefined crash).
+// If M1 is found but M2 is not, we write NOTHING (getAdMetadata stays intact = crash-safe; A2/DAI
+// still provide ad coverage) and dump the region after M1 ONCE so M2 can be re-anchored precisely.
+function patchMASTERw(rs){ if(masterDone||mwDone)return;
+  // --- locate M1: getAds( <arg> );if( <cond> ){var  -> the <cond> byte (offset 13) ---
+  var p1=pat('getAds(')+' ?? '+pat(');if(')+' ?? '+pat('){var '), m1off=13;
+  var m1addr=null,m1cc=-1;
+  for(var i=0;i<rs.length&&!m1addr;i++){var r=rs[i];if(r.size>128*1024*1024)continue;
+    try{var h=Memory.scanSync(r.base,r.size,p1);for(var j=0;j<h.length;j++){var t=h[j].address.add(m1off);var cc=-1;try{cc=t.readU8();}catch(e){}if(!isAlpha(cc))continue;m1addr=t;m1cc=cc;break;}}catch(e){}}
+  if(!m1addr)return;   // getAdMetadata body not resident yet — try again next pass
+  // --- locate M2: else return; [gap] <acc> =this.adBreakHydrator ---
+  // The accumulator sits just before '=this.adBreakHydrator'. Older builds had NO gap
+  // (else return;b=this...); the 2026-09 build inserted a newline (else return;\nb=this...). Try
+  // gap sizes 1 and 2 so both layouts match; <acc> is the alpha byte right before '=this.'.
+  // Overwrite the 12-byte 'else return;' with 'else <acc>=[]  ;' so the else path yields a VALID
+  // empty array (never undefined) that flows through the enrich chain -> returns [] (no v1 crash).
+  var m2addr=null,m2vc=-1;
+  var gaps=[1,2];
+  for(var gi=0;gi<gaps.length&&!m2addr;gi++){ var gap=gaps[gi];
+    var p2=pat('else return;'); for(var gg=0;gg<gap;gg++) p2+=' ??'; p2+=' '+pat('=this.adBreakHydrator');
+    var accOff=12+gap-1;   // the <acc> byte = last wildcard, immediately before '=this.'
+    for(var i2=0;i2<rs.length&&!m2addr;i2++){var r2=rs[i2];if(r2.size>128*1024*1024)continue;
+      try{var h2=Memory.scanSync(r2.base,r2.size,p2);for(var j2=0;j2<h2.length;j2++){var vc=-1;try{vc=h2[j2].address.add(accOff).readU8();}catch(e){}if(!isAlpha(vc))continue;m2addr=h2[j2].address;m2vc=vc;break;}}catch(e){}}
+  }
+  if(m2addr){
+    var vch=String.fromCharCode(m2vc), neu='else '+vch+'=[]  ;';
+    if(neu.length===12){
+      Memory.protect(m1addr,1,'rw-');m1addr.writeByteArray([0x30]);
+      Memory.protect(m2addr,12,'rw-');m2addr.writeByteArray(bytesOf(neu));
+      mwDone=true;masterDone=true;
+      L('PATCH MASTERw: getAdMetadata if('+String.fromCharCode(m1cc)+')->if(0) @'+m1addr+' + else return;->else '+vch+'=[] @'+m2addr+' (atomic, rename-tolerant) — string-drift recovered');
+    }
+    return;
+  }
+  // M1 found, M2 not -> CRASH-SAFE: write nothing; dump the region after M1 once for re-anchor.
+  if(!mwDumped){ mwDumped=true; var ctx=null; try{ctx=m1addr.sub(24).readCString(700);}catch(e){}
+    L('MASTERw M2-MISS (no write, crash-safe) dump@'+m1addr+' cond="'+String.fromCharCode(m1cc)+'" ctx='+JSON.stringify(ctx)); }
+}
+// ---------- (MASTERdump) read-only recon: dump CURRENT getAdMetadata body on drift ----------
+// If BOTH the exact and wildcard MASTER matches miss, the drift is a real REFACTOR, not a rename —
+// we need the new source to re-anchor. This dumps ~500 chars from the getAdMetadata token to logcat
+// ONCE so the new body can be read off-device. Runs only if masterDone stays false ~34s in (ads
+// would already be leaking by then). Read-only; no writes.
+var _mdumpN=0, mdumpDone=false;
+function dumpMASTER(){ if(masterDone||mdumpDone)return; _mdumpN++;
+  if(_mdumpN<17){ setTimeout(dumpMASTER,2000); return; }   // wait ~34s for appboot JS to materialise
+  var rs=Process.enumerateRanges('rw-'), mk='getAdMetadata', mp=pat(mk), hits=0;
+  for(var i=0;i<rs.length;i++){var r=rs[i];if(r.size>128*1024*1024)continue;
+    try{var h=Memory.scanSync(r.base,r.size,mp);for(var j=0;j<h.length&&hits<4;j++){var addr=h[j].address,ctx=null;try{ctx=addr.readCString(520);}catch(e){}if(ctx==null||ctx.indexOf(mk)<0)continue;hits++;L('MASTER-DUMP hit@'+addr+' ctx='+JSON.stringify(ctx));}}catch(e){}}
+  mdumpDone=true; L('MASTER-DUMP: '+hits+' getAdMetadata source hit(s) — re-anchor from these bodies (or 0 = token itself renamed)');
 }
 // ---------- (B) pause patch ----------
 var B_ANCHOR='void 0:e.displayAd',B_OLD='e.displayAd',B_NEW='void 0     ';
@@ -348,7 +410,7 @@ var tries=0;
 function apply(){ tries++; var rs=Process.enumerateRanges('rw-');
   var loaded=false,gp=pat('nrdp.gibbon');
   for(var i=0;i<rs.length&&!loaded;i++){if(rs[i].size>128*1024*1024)continue;try{if(Memory.scanSync(rs[i].base,rs[i].size,gp).length)loaded=true;}catch(e){}}
-  if(loaded){patchA(rs);patchA2(rs);patchADV(rs);patchDAI(rs);patchMASTER(rs);patchB(rs);patchFP(rs);patchGAID(rs);patchHH(rs);neuterMhuRenders(rs);patchCLCS(rs);}
+  if(loaded){patchA(rs);patchA2(rs);patchADV(rs);patchDAI(rs);patchMASTER(rs);if(!masterDone)patchMASTERw(rs);patchB(rs);patchFP(rs);patchGAID(rs);patchHH(rs);neuterMhuRenders(rs);patchCLCS(rs);}
   // Keep polling until applied. The ad-insertion source (ADV/DAI) and prepareAdBreakStates (A)
   // can load LATER than the pause module (B) — sometimes only once playback is exercised — so we
   // must NOT give up early. WRITE-ONCE per patch (done guards) — not a re-patch loop.
@@ -373,6 +435,9 @@ function observe(){ cyc++;
   }
   var bks=Object.keys(bset).map(Number).sort(function(a,b){return b-a}).slice(0,6);
   var tag=(kill>1?'  <<<MANIFEST-KILL':'')+(disp>0?'  <<<server-pauseAd(x'+disp+')':'')+(real>0?'  <<<rawRealPod(x'+real+')':'');
+  // Drift alarm: raw pods present but nothing killed -> report which anchors installed so we can tell
+  // string-drift (MASTER=0: anchor scan-missed) from semantic-drift (MASTER=1: matched but ineffective).
+  if(real>0 && kill===0){ tag+='  <<<DRIFT[A='+(aDone?1:0)+' A2='+(a2Done?1:0)+' ADV='+(advDone?1:0)+' DAI='+(daiDone?1:0)+' MASTER='+(masterDone?1:0)+(mwDone?'w':'')+']'; }
   L('OBS'+cyc+': KILLMARK='+kill+' rawRealPods='+real+' rawDisplayAd='+disp+' bookmarks='+JSON.stringify(bks)+tag);
   if(cyc<560) setTimeout(observe,3000);   // ~28 min coverage
 }
@@ -382,6 +447,8 @@ setTimeout(apply,5000);
 setTimeout(observe,9000);
 L('fastMASTER armed (getAdMetadata early race-win scanner — beat first-title pre/mid-roll)');
 setTimeout(fastMASTER,200);
+L('dumpMASTER armed (recon: dump getAdMetadata body if both exact+wildcard MASTER miss — #166)');
+setTimeout(dumpMASTER,2000);
 if(HH_ENABLED){ L('fastHH armed (household prompt suppression, early race-win scanner)'); setTimeout(fastHH,200);
 }
 if(CLCS_PROBE_ENABLED){ L('clcsProbe armed (DEV recon: locate runtime CLCS interstitial consumer — Nikflix seam)'); setTimeout(clcsProbe,200); }
