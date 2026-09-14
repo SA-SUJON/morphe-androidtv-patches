@@ -1,3 +1,11 @@
+# [1.36.0](https://github.com/ajstrick81/morphe-androidtv-patches/compare/v1.35.3...v1.36.0) (2026-09-14)
+
+
+### Features
+
+* **netflix:** atomic wildcard MASTER fallback + drift self-detection ([#166](https://github.com/ajstrick81/morphe-androidtv-patches/issues/166)) ([e2382b4](https://github.com/ajstrick81/morphe-androidtv-patches/commit/e2382b4c86004235beb8f098ce987d542da84004))
+* **netflix:** wildcard ADV fallback to close getAdMetadata middle branch ([#166](https://github.com/ajstrick81/morphe-androidtv-patches/issues/166)) ([cc6d974](https://github.com/ajstrick81/morphe-androidtv-patches/commit/cc6d9740c954a90c1d795125a1b2f0b1ddc5dd0f))
+
 ## [1.35.3](https://github.com/ajstrick81/morphe-androidtv-patches/compare/v1.35.2...v1.35.3) (2026-09-14)
 
 
