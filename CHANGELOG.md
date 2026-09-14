@@ -1,3 +1,10 @@
+## [1.35.3](https://github.com/ajstrick81/morphe-androidtv-patches/compare/v1.35.2...v1.35.3) (2026-09-14)
+
+
+### Bug Fixes
+
+* **primevideo:** don't abort patching on v16 (6.24.x) — optional ad hooks ([#120](https://github.com/ajstrick81/morphe-androidtv-patches/issues/120)) ([d697b24](https://github.com/ajstrick81/morphe-androidtv-patches/commit/d697b2405be027b895efbe0d935fb4f2f12df52f))
+
 ## [1.35.2](https://github.com/ajstrick81/morphe-androidtv-patches/compare/v1.35.1...v1.35.2) (2026-09-13)
 
 
