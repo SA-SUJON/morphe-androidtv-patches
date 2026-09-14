@@ -21,5 +21,21 @@ val skipAdsPatch = bytecodePatch(
 
         // Hook 2 — neuter the client IMA AdEvent handler (belt-and-suspenders).
         ClientAdEventHandlerFingerprint.methodOrNull?.addInstructions(0, "return-void")
+
+        // Hook 3 (seamless) — empty the ad-break SCHEDULE. z2/y.b(List)[J converts
+        // the IMA cue points to a long[] of break times that becomes the player's
+        // ad-break state; returning an empty long[] means no markers and no
+        // scheduled pauses, so content plays straight through — while
+        // onAdsManagerLoaded still runs, so content is never gated (unlike v2, which
+        // hung on an infinite spinner). Hooks 1/2 remain as backup for the ad-play
+        // path. Return a fresh empty long[0].
+        CuePointsToTimesFingerprint.methodOrNull?.addInstructions(
+            0,
+            """
+                const/4 v0, 0x0
+                new-array v0, v0, [J
+                return-object v0
+            """,
+        )
     }
 }

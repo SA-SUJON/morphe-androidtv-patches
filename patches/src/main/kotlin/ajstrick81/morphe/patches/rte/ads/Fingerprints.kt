@@ -58,3 +58,29 @@ object ClientAdEventHandlerFingerprint : Fingerprint(
         }
     },
 )
+
+// Hook 3 (v3, seamless) — the cue-points→times[] converter (z2/y.b(List)[J).
+//
+// v2 tried neutering the whole onAdsManagerLoaded, but RTÉ's content-start is GATED
+// on that callback firing — killing it hung playback on an infinite spinner
+// (Paramount-class: don't break a flow the player blocks on). Instead, let
+// onAdsManagerLoaded RUN and empty the ad-break SCHEDULE it builds: it feeds
+// getAdCuePoints() through this converter to a long[] of break times (fed into the
+// player's ad-break state). Neutering this to return an EMPTY long[] means zero
+// break times → no scrubber markers, no scheduled pauses, no content stop — but the
+// callback still completes so content is never gated. Both ad call sites (client +
+// the other ad path) route through here, so one hook covers both.
+//
+// Matched by: PUBLIC+STATIC, returns [J, one List param, AND defined in the ad-util
+// class (the class that also has a method returning IMA's AdsRequest — z2/y.c),
+// which uniquely pins z2/y.b and can't hit an unrelated List→long[] helper.
+object CuePointsToTimesFingerprint : Fingerprint(
+    returnType = "[J",
+    parameters = listOf("Ljava/util/List;"),
+    accessFlags = listOf(AccessFlags.PUBLIC, AccessFlags.STATIC),
+    custom = { _, classDef ->
+        classDef.methods.any {
+            it.returnType == "Lcom/google/ads/interactivemedia/v3/api/AdsRequest;"
+        }
+    },
+)
