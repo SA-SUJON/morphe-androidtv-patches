@@ -255,6 +255,50 @@ Both are materially deeper than the eval hook. Net: #168's seam is proven, `eval
 boundary on 13.x, and the tractable next step is task 1 (kill the code-cache consume so source is
 parsed) — a focused follow-up, not this session.
 
+## 10. ⚠️ CORRECTION — code-cache theory (§8/§9) was WRONG; large bundles DO eval as source
+
+A follow-up light-probe pass (bounded 256 KB windowed reads, no black-screen) caught what the
+earlier runs missed: **a ~8 MB source String IS `eval`'d at appboot** (`EVALPROBE-DEEP
+len=7956073 scanned=7958185`). Window-scanned the *entire* 8 MB body — clean source, no truncation.
+Earlier misses were artifacts, not evidence of a code cache:
+- the first probe cut off at eval #3 (the big bundle evals at #11–13, ~30–45 s in);
+- the 16 MB-read version black-screened (stalled the eval thread) *before* it could log;
+- the 512 KB-cap version saw it but only searched the first 512 KB → "capped".
+
+So **the §8/§9 "eval consumes cached bytecode (`kConsumeCodeCache`)" conclusion is retracted.**
+Netflix's big appboot bundles come through `nrdp.gibbon.eval` as **plain multi-MB source** — the
+load-hook **can** intercept and rewrite them. `ScriptCompiler::CreateCodeCache` strings exist in
+the binary but are not gating our bundles.
+
+### The actual remaining fact: our anchors are in ON-DEMAND modules we couldn't trigger
+The full 8 MB appboot bundle scan found **none** of `setAccountSharingFlags` /
+`isNetflixHouseholdAvailable` / `isActiveMisdetectionSession` / `getAdMetadata` / `adBreakHydrator`.
+Yet the heap-scan patch finds those literals in memory once the relevant feature runs. Conclusion:
+they live in **separately, lazily-loaded modules** fetched *after* appboot via `loadScript → eval`:
+- `getAdMetadata` → the **player/ads bundle**, loaded on **playback start**.
+- `setAccountSharingFlags`/MHU → the **household bundle**, loaded when an **active household
+  challenge** mounts.
+
+Both are `loadScript → eval` on-demand loads, so the hook **should** catch them the same way it
+caught the 8 MB bundle — we simply never triggered either module on this unit:
+- playback is **household-gated** (de-trusted `.211`), and
+- no **active server-side challenge** was in effect during the probe (challenges are public-IP /
+  server driven and can't be manufactured on demand).
+
+### Revised status of #168 (supersedes §8/§9)
+- ✅ ABI solved + `+12` String read proven live (§7).
+- ✅ Large bundles `eval` as source → **load-hook is viable** (code-cache is NOT the blocker).
+- ⬜ The remaining validation is a **device-state** problem, not an RE problem: to catch
+  `getAdMetadata` eval'ing, get **past the household gate** (home VPN or a one-time household
+  verify with a household-OFF build) so a title plays, then re-run the probe on the player bundle.
+  To catch the household module, need an **active challenge** (e.g. VPN region change to provoke
+  one).
+- ❌ The deep `kConsumeCodeCache` RE (§9 task 1) is **NOT needed** — that premise was wrong.
+
+Recommended next session: unblock playback (VPN/verify), re-arm the windowed probe, start a title,
+and confirm the player bundle evals with `getAdMetadata` present → then wire the length-preserving
+source rewrite (§6) on that buffer. That closes the ad-kill half of #168 race-free + drift-proof.
+
 ### Open checks for the rewrite step
 - Confirm the `sp+12` buffer is the *same* memory V8 parses (not a copied/relocated buffer at
   compile). If `eval` internalizes/copies, rewrite must land on the exact buffer read by the
