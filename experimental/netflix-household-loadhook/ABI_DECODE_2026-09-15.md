@@ -211,6 +211,50 @@ heap-scan path. Viable directions if #168 is pursued further:
 The ABI/seam work (§1–7) is durable and reusable if a future Netflix build delivers these bundles
 through eval, or once the snapshot-restore boundary is mapped.
 
+## 9. Ruling out an alternate compile entrypoint — `eval` is the only one (2026-09-15)
+
+Before committing to deep snapshot RE, enumerated the whole **`Gibbon2Bridge` native method
+table** offline (`enum_bridge.py` → `gibbon2bridge-methods.txt`; walks the descriptor structs
+{name@+0, class@+4, nargs@+8, argtable@+0xc} by scanning the RW segment for pointers to the
+`Gibbon2Bridge` class string). 80 descriptors, 32 unique methods. Relevant surface:
+
+```
+eval            addInjectJS      init          bootFailure     showErrorPage
+sync            _hash            addFont       setSyncCallback  garbageCollect
+getHeapSize     getFrameInfo     ... (rendering/input/font/event methods)
+```
+
+**There is NO `loadScript` / `compile` / `run` / `evaluate` / `loadBytecode` / `import` native
+method.** The JS-level `nrdp.gibbon.loadScript` is defined *in JS* and calls `nrdp.gibbon.eval`.
+So **`eval` is the single source-compile entry** — we were not missing an alternate binding.
+(Note: the `cb@desc+0x18` column in the dump is a shared thunk, not the real per-method callback
+— the real `eval` callback is the separately-confirmed `0x137625c`; treat that column as a rough
+tag only.)
+
+### Conclusion → the actual mechanism, and the real remaining task
+Putting §7–§9 together: `eval` fires only ~2–8× per launch and carries just helper modules, cold
+**or** warm — even after a `pm clear` wiped the `real_*.bin` snapshots. The only consistent
+explanation is that Netflix ships/keeps a **V8 code cache (compiled bytecode)** for the big
+bundles and `eval` **consumes the cached bytecode** (`ScriptCompiler::kConsumeCodeCache`) instead
+of parsing source — so the source string is never materialised through the hook for
+`getAdMetadata` / `setAccountSharingFlags`. (Consistent with the household memo's finding that the
+warm snapshots restore *compiled* heap, and with the heap-scan patch only finding `getAdMetadata`
+*source* once playback lazily reifies it.)
+
+**Therefore the load-hook, to work for our anchors, must operate at the V8 compile layer, not the
+Gibbon `eval` binding.** Two concrete (deep) next tasks:
+  1. **Force source-parse:** find where `eval`'s C++ builds the `ScriptCompiler::Source` /
+     `CompileOptions` and neutralise the `kConsumeCodeCache` path (or null the cached-data arg) so
+     V8 re-parses from source → then the existing eval-source rewrite lands. Locate via the
+     `v8::ScriptCompiler` compile call inside the eval worker `0x1a59034` chain.
+  2. **Or intercept the deserialize/compile boundary itself** (`Snapshot`/`CodeSerializer::
+     Deserialize` / `Compiler::GetSharedFunctionInfoForScript`) — but V8 source-path strings are
+     stripped in this build, so this is a hard, symbol-less hunt.
+
+Both are materially deeper than the eval hook. Net: #168's seam is proven, `eval` is the wrong
+boundary on 13.x, and the tractable next step is task 1 (kill the code-cache consume so source is
+parsed) — a focused follow-up, not this session.
+
 ### Open checks for the rewrite step
 - Confirm the `sp+12` buffer is the *same* memory V8 parses (not a copied/relocated buffer at
   compile). If `eval` internalizes/copies, rewrite must land on the exact buffer read by the
