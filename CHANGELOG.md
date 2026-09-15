@@ -1,3 +1,10 @@
+## [1.37.1](https://github.com/ajstrick81/morphe-androidtv-patches/compare/v1.37.0...v1.37.1) (2026-09-15)
+
+
+### Bug Fixes
+
+* **netflix:** tighten ADVw fingerprint + add ANCHOR MAP self-detection ([#166](https://github.com/ajstrick81/morphe-androidtv-patches/issues/166)) ([fe11328](https://github.com/ajstrick81/morphe-androidtv-patches/commit/fe1132884538f700cb5b5d67c9541ad48f64462f))
+
 # [1.37.0](https://github.com/ajstrick81/morphe-androidtv-patches/compare/v1.36.0...v1.37.0) (2026-09-15)
 
 
