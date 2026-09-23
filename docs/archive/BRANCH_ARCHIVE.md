@@ -21,6 +21,13 @@ git checkout archive/<branch-name>
 
 On GitHub you can also browse any tag from the branch/tag picker.
 
+## Archiving more branches later
+
+The monthly **Stale branch report** workflow opens (or updates) an issue
+labelled `stale-branches` that lists branches with no commits in 30+ days.
+To archive some, run Actions → **Archive branches** with their names
+(`dry-run` first, then `execute`), then add them to the tables below.
+
 ## Why the old branches looked "hundreds of commits ahead"
 
 `main`'s history was rewritten on 2026-08-28. Its oldest commit is
