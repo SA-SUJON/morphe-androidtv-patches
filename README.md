@@ -99,6 +99,9 @@ All patches follow the same general workflow using **Morphe Manager**:
 > for how the current native (`libpvhook.so`) approach works and complete install
 > recommendations. The original Reddit announcement is archived for transparency at
 > [`docs/archive/2026-07_prime-video-reddit-post.md`](docs/archive/2026-07_prime-video-reddit-post.md).
+>
+> 🔬 **How it works under the hood:** [`docs/PRIME_VIDEO_ATV_SYSTEM_DESIGN.md`](docs/PRIME_VIDEO_ATV_SYSTEM_DESIGN.md)
+> is a reverse-engineering teardown of Prime Video's ad and playback system, and of why the patch works.
 
 ---
 
