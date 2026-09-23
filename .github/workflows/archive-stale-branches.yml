@@ -1,0 +1,111 @@
+# One-time repo cleanup (2026-09-23): archive the stale branches as
+# `archive/<branch>` tags, then delete the branches. See
+# docs/archive/BRANCH_ARCHIVE.md for what each branch held and how to restore it.
+#
+# Run it from Actions → "Archive stale branches" → Run workflow. It defaults to
+# a dry run; pick "execute" to actually tag + delete. A branch is only deleted
+# after its archive tag is confirmed on GitHub at the same commit, so nothing
+# can be lost. Safe to re-run. Delete this file once it has been run.
+name: Archive stale branches
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "dry-run only reports; execute tags + deletes"
+        type: choice
+        options: [dry-run, execute]
+        default: dry-run
+
+permissions:
+  contents: write
+
+jobs:
+  archive:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Tag and delete stale branches
+        env:
+          MODE: ${{ inputs.mode }}
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          # Explicit list: nothing outside it (and never main) is touched.
+          BRANCHES=(
+            chore/espn-readme-and-desc
+            claude-push-test-1782171992
+            claude/fork-analysis-java-94e5dn
+            claude/intelligent-edison-67tjpu
+            claude/morphe-attribution-tracking-qcwmug
+            claude/morphe-cli-test-env-di231x
+            claude/netflix-household-android-tv-bou10v
+            claude/onn-usb-install-method-zr8qd7
+            claude/optimistic-cannon-a521v7
+            claude/paramount-patch-install-guide-65v2vk
+            claude/powershell-atv-youtube-upload-0m7mg2
+            claude/prime-video-continuation-kaplat
+            claude/primevideo-interception-handoff-pxhsn0
+            claude/purple-tv-android-tv-ke9wrl
+            claude/readme-tubi-apk-info-y1lsvw
+            claude/scte35-youtube-tv-signaling-vyy0cy
+            claude/spotilol-project-research-tgjtzh
+            claude/toolkit-cross-apk-compat-ku719r
+            claude/twitch-ad-blocking-techniques-x0pi28
+            claude/twitch-atv-webview-adblock
+            claude/upbeat-heisenberg-noys1i
+            claude/vix-apk-patch-analysis-xrhhqe
+            claude/youtube-tv-apkm-decompile-hb84gr
+            dev
+            docs/netflix-loadhook-abi
+            experiment/paramount-slate-manifest-continuity
+            feat/espn-live-slate
+            feat/hbomax-strip-stitched-ad-periods
+            feat/primevideo-phone-on-tv
+            feat/vix-4.47.2-support
+            fix/paramount-harden-fingerprints-1619
+            fix/paramount-slate-revert-hotpath
+          )
+
+          archived=0; deleted=0; skipped=0
+          for b in "${BRANCHES[@]}"; do
+            [ "$b" = main ] && { echo "::error::refusing to touch main"; exit 1; }
+            tag="archive/$b"
+            sha=$(git ls-remote origin "refs/heads/$b" | cut -f1)
+            tag_sha=$(git ls-remote origin "refs/tags/$tag^{}" | cut -f1)
+
+            if [ -z "$sha" ]; then
+              if [ -n "$tag_sha" ]; then echo "✓ $b: already archived + deleted"; else echo "::warning::$b: branch missing and no archive tag"; fi
+              skipped=$((skipped+1)); continue
+            fi
+
+            if [ -z "$tag_sha" ]; then
+              echo "→ $b @ ${sha:0:8}: create $tag"
+              if [ "$MODE" = execute ]; then
+                git fetch -q --no-tags origin "refs/heads/$b"
+                git tag -a "$tag" "$sha" -m "Archived branch $b (repo cleanup 2026-09-23). Restore: git push origin $tag:refs/heads/$b"
+                git push -q origin "refs/tags/$tag"
+                tag_sha=$(git ls-remote origin "refs/tags/$tag^{}" | cut -f1)
+              fi
+              archived=$((archived+1))
+            elif [ "$tag_sha" != "$sha" ]; then
+              echo "::warning::$b moved since it was archived ($tag=${tag_sha:0:8}, branch=${sha:0:8}); leaving it alone"
+              skipped=$((skipped+1)); continue
+            fi
+
+            if [ "$MODE" = execute ]; then
+              [ "$tag_sha" = "$sha" ] || { echo "::error::$tag not confirmed at ${sha:0:8}; not deleting $b"; exit 1; }
+              git push -q origin --delete "$b"
+              echo "✗ deleted branch $b (kept as $tag)"
+            else
+              echo "  (dry run) would delete $b after tagging"
+            fi
+            deleted=$((deleted+1))
+          done
+
+          echo "mode=$MODE archived=$archived deleted=$deleted skipped=$skipped" | tee -a "$GITHUB_STEP_SUMMARY"
