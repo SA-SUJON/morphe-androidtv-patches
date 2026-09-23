@@ -97,6 +97,19 @@ Learned during the 2026-09 cleanup (PR #191); keep the repo this way.
   reachable even by `curl` (the file text is in the page HTML), while the API
   and `gist.githubusercontent.com` raw URLs are not.
 
+**Diagrams**
+- For diagrams inside Markdown (docs, READMEs, gists), prefer ```` ```mermaid ````
+  blocks. GitHub and gists render them natively.
+- For interactive diagrams, use the vendored **archify** skill
+  (`.claude/skills/archify/`, pinned and reviewed; see its `VENDORED.md`).
+  Specs and output live in `docs/diagrams/`. Gists can't run HTML, so embed the
+  preview PNG via a `raw.githubusercontent.com` URL and link the interactive
+  HTML on GitHub Pages
+  (`https://ajstrick81.github.io/morphe-androidtv-patches/diagrams/<name>.html`,
+  served from `main` `/docs`).
+- To preview a local HTML file in the Playwright browser, serve it with
+  `python3 -m http.server --bind 127.0.0.1` (`file:` URLs are blocked).
+
 **Building**
 - A local Gradle build needs a GitHub token for the Morphe GitHub Packages
   registry (`gpr.user`/`gpr.key` or `GITHUB_ACTOR`/`GITHUB_TOKEN`). Without

@@ -25,7 +25,9 @@ if [ -x /opt/pw-browsers/chromium ]; then
   args+=(--executable-path /opt/pw-browsers/chromium)
 fi
 if [ -n "${HTTPS_PROXY:-}" ]; then
-  args+=(--proxy-server "$HTTPS_PROXY")
+  # Keep local previews (e.g. `python3 -m http.server` for docs/diagrams/)
+  # off the proxy; it rejects plain-HTTP requests with 405.
+  args+=(--proxy-server "$HTTPS_PROXY" --proxy-bypass "localhost,127.0.0.1,::1")
 fi
 # Running as root in a container: Chromium's sandbox needs user namespaces
 # that containers usually don't provide.

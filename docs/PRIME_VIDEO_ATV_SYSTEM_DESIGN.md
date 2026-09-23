@@ -28,38 +28,34 @@ That runtime resolution is the seam. The shipping patch never touches the player
 1\. Architecture Overview
 -------------------------
 
+```mermaid
+flowchart TB
+  subgraph device["Android TV device (Onn 4K / Google TV, armeabi-v7a)"]
+    shell["com.amazon.amazonvideo.livingroom<br/>thin Java/Kotlin shell<br/>IgnitionActivity (LEANBACK entry)"]
+    subgraph ignite["libignite.so (~15.6 MB): Ignite / Megablast runtime"]
+      wamr["WAMR<br/>WebAssembly: the UI app"]
+      qjs["QuickJS ★<br/>the PLAYER + all AD logic"]
+      v8["V8<br/>present, unused on this ROM"]
+      native["Native host API<br/>network, storage, codec"]
+      curl["libcurl 8.9.x + zlib<br/>all HTTP + gzip in-process"]
+    end
+    shell -- "System.loadLibrary(#quot;ignite#quot;)" --> ignite
+  end
+  bundle["Downloaded bundle<br/>ignitionx QuickJS source<br/>encrypted at rest"]
+  prs["PRS / catalog<br/>GetVodPlaybackResources<br/>→ intraTitlePlaylist"]
+  ads["Ad decision + CDN<br/>getVideoAds → regolith<br/>ters-sgai1, ad CDNs"]
+  curl --> bundle
+  curl --> prs
+  curl --> ads
 ```
-┌──────────────────────────────────────────────────────────────────────────────┐
-│  Android TV device (Onn 4K / Google TV, armeabi-v7a)                         │
-│                                                                              │
-│  com.amazon.amazonvideo.livingroom  (thin Java/Kotlin shell)                 │
-│    └─ com.amazon.ignition.IgnitionActivity  (LEANBACK launcher entry)        │
-│         │ System.loadLibrary("ignite")                                       │
-│         ▼                                                                    │
-│  ┌──────────────────────────── libignite.so (~15.6 MB) ───────────────────┐  │
-│  │  "Ignite" / "Megablast" runtime                                        │  │
-│  │                                                                        │  │
-│  │   ScriptEngineType_Wamr     ← WebAssembly Micro Runtime (the UI app)   │  │
-│  │   ScriptEngineType_QuickJs  ← JS engine (the PLAYER + AD logic)  ★     │  │
-│  │   ScriptEngineType_V8       ← present, unused on this ROM              │  │
-│  │   ScriptEngineType_Native   ← host-call API (network, storage, codec)  │  │
-│  │                                                                        │  │
-│  │   Statically-linked libcurl 8.9.x + zlib  (all HTTP + gzip in-process) │  │
-│  └────────────────────────────────────────────────────────────────────────┘  │
-│         │                    │                        │                      │
-│         ▼                    ▼                        ▼                      │
-│   downloaded bundle    PRS / catalog            ad-decision + CDN            │
-│   (ignitionx, QuickJS  (GetVodPlaybackResources) (getVideoAds → regolith,    │
-│    source, encrypted    → intraTitlePlaylist)     ters-sgai1, ad CDNs)       │
-│    at rest)                                                                  │
-└──────────────────────────────────────────────────────────────────────────────┘
 
-        Downloaded JS bundle host : cloudfront.xp-assets.aiv-cdn.net
-        PRS host                  : *.aiv-delivery.net / api.amazonvideo.com
-        Ad-decision (SGAI)        : *.regolith.prime-video.amazon.dev  (getVideoAds/getAds)
-        Ad stitch/seam host       : ters-sgai1.us-east-1.aiv-delivery.net
-        Pause-ad host             : *.regolith.prime-video.amazon.dev  (format=PAUSE_ADS_STATIC)
-```
+| Role | Host |
+|---|---|
+| Downloaded JS bundle | `cloudfront.xp-assets.aiv-cdn.net` |
+| PRS | `*.aiv-delivery.net` / `api.amazonvideo.com` |
+| Ad decision (SGAI) | `*.regolith.prime-video.amazon.dev` (`getVideoAds` / `getAds`) |
+| Ad stitch / seam | `ters-sgai1.us-east-1.aiv-delivery.net` |
+| Pause ads | `*.regolith.prime-video.amazon.dev` (`format=PAUSE_ADS_STATIC`) |
 
 The single most important architectural fact: **the player is not compiled into the binary.** Static analysis of `libignite.so` finds the bootstrap framework (`MegablastLog`, `GetReactURI`, `appBootstrap`). It finds **zero** occurrences of the player and ad identifiers (`PeriodTailor`, `PRSResponseHandler`, `splitMainContent`, `resolveWithAdBreaks`, `AdBreakManager`, `intraTitlePlaylist`). Those live only in the **downloaded** bundle.
 
@@ -262,20 +258,16 @@ Supporting cast (all QuickJS, all observable):
 
 ### 5.1 The lifecycle of one break
 
-```
-PRS.intraTitlePlaylist:  … Main …  [Remote → getVideoAds]  … Main …
-                                        │
-                 unresolvedAdBreak placeholder  ({start:0,end:0})
-                                        │  (resolves at/just-before playback)
-                          RegolithClient.send(getVideoAds?…&adMarkerId=…)
-                                        │
-                              response { playlist:[ad0,ad1], measurement }
-                                        │
-        insertIntoMediaRepresentation + insertIntoPlaylist + shiftPositionsFrom
-                                        │
-              PeriodTailor:  Main_2 | AdBreak1_Ad0..Ad3 | Main_4   (seamless)
-                                        │
-                     unblockXpPlaylistIndex(a + playlist.length)
+```mermaid
+flowchart TB
+  prs["PRS intraTitlePlaylist<br/>… Main … [Remote → getVideoAds] … Main …"]
+  ph["unresolvedAdBreak placeholder<br/>{start:0, end:0}"]
+  send["RegolithClient.send<br/>getVideoAds?…#amp;adMarkerId=…"]
+  resp["response<br/>{ playlist:[ad0, ad1], measurement }"]
+  ins["insertIntoMediaRepresentation<br/>+ insertIntoPlaylist + shiftPositionsFrom"]
+  pt["PeriodTailor<br/>Main_2 | AdBreak1_Ad0..Ad3 | Main_4 (seamless)"]
+  ub["unblockXpPlaylistIndex(a + playlist.length)"]
+  prs --> ph -- "resolves at / just before playback" --> send --> resp --> ins --> pt --> ub
 ```
 
 * * *
@@ -315,6 +307,10 @@ Ad-decision responses truncate too. In aggressive-ad regions (India, EU) a mid-r
 
 8\. The Seams — what we tried, and what ships
 ---------------------------------------------
+
+[![The shipped ad strip: PRS and regolith responses pass through libcurl/zlib, where libpvhook.so blanks ad data in the copy destination before the QuickJS player parses it](https://raw.githubusercontent.com/ajstrick81/morphe-androidtv-patches/main/docs/diagrams/primevideo-ad-path.png)](https://ajstrick81.github.io/morphe-androidtv-patches/diagrams/primevideo-ad-path.html)
+
+> ▶ **[Explore the interactive diagram](https://ajstrick81.github.io/morphe-androidtv-patches/diagrams/primevideo-ad-path.html)**. Step through four guided views: *Movies: strip Remote*, *TV: empty ad list*, *#14: why slots stay* and *Truncated responses*. It is also in the repo as [`docs/diagrams/primevideo-ad-path.html`](https://github.com/ajstrick81/morphe-androidtv-patches/blob/main/docs/diagrams/primevideo-ad-path.html), a single self-contained file that works offline.
 
 The dynamic-resolution architecture concentrates all ad authority in a few decision points, each with a **built-in "no ads" path** the app already executes cleanly. Three seams were identified. Two ship; one was rejected.
 
