@@ -80,6 +80,23 @@ Learned during the 2026-09 cleanup (PR #191); keep the repo this way.
 - Never commit APKs or decompiled app sources (`.gitignore` covers
   `*.apk` and `decompiled/`).
 
+**Browsing the web (Playwright MCP)**
+- `.mcp.json` registers a `playwright` MCP server (`scripts/playwright-mcp.sh`,
+  pinned `@playwright/mcp` version) so Claude can drive a real headless browser:
+  read JS-rendered pages, click through sites, take screenshots. Use it for
+  gists, upstream projects, forum threads and release pages the user points at.
+- In Claude Code on the web, `.claude/hooks/session-start.sh` makes Chromium
+  trust the egress proxy's CA (imports `/root/.ccr/agent-proxy-ca.crt` into
+  `~/.pki/nssdb`). Without it every page fails with
+  `ERR_CERT_AUTHORITY_INVALID`. Never "fix" that with `--ignore-https-errors`.
+- A browser does **not** get around the cloud environment's network policy.
+  `ERR_TUNNEL_CONNECTION_FAILED` means the policy blocked the host (e.g.
+  `apkmirror.com`, `gist.githubusercontent.com`); `github.com` pages outside
+  this repo return 403. Ask the user to allow the host in the environment's
+  Network access settings. For gists, `gist.github.com/<user>/<id>` pages are
+  reachable even by `curl` (the file text is in the page HTML), while the API
+  and `gist.githubusercontent.com` raw URLs are not.
+
 **Building**
 - A local Gradle build needs a GitHub token for the Morphe GitHub Packages
   registry (`gpr.user`/`gpr.key` or `GITHUB_ACTOR`/`GITHUB_TOKEN`). Without
