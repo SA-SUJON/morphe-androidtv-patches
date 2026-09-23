@@ -35,9 +35,14 @@ Learned during the 2026-09 cleanup (PR #191); keep the repo this way.
 - `feat`/`fix`/`perf`/`revert` commits cut a release. Use `docs`/`chore`/
   `refactor`/`ci`/`experiment` for anything that shouldn't.
 - When a branch is abandoned, don't just let it rot. Copy any docs or
-  research worth keeping into `main`, tag the branch `archive/<branch>` and
-  delete it. `docs/archive/BRANCH_ARCHIVE.md` is the index of archived
-  branches. Add new ones there.
+  research worth keeping into `main`, then archive it with the **Archive
+  branches** workflow (Actions → Run workflow, paste names, `dry-run` then
+  `execute`). It tags the branch `archive/<branch>` before deleting it.
+  `docs/archive/BRANCH_ARCHIVE.md` is the index of archived branches. Add new
+  ones there.
+- The **Stale branch report** workflow runs on the 1st of each month and
+  keeps one open issue (label `stale-branches`) listing branches with no
+  commits in 30+ days. It only reports; a human decides what to archive.
 - `main`'s history was rewritten on 2026-08-28. Branches or PRs older than
   that share no ancestor with `main`, so GitHub shows them as "hundreds of
   commits ahead" or "closed, not merged" even if their content landed.
