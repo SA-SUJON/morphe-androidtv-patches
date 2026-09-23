@@ -3,7 +3,7 @@ group = "app.morphe"
 patches {
     about {
         name = "ajstrick81 Patches"
-        description = "Paramount+ and Disney+ Android TV ad blocking patches"
+        description = "Ad-blocking patches for Android TV streaming apps"
         source = "https://github.com/ajstrick81/morphe-androidtv-patches"
         author = "ajstrick81"
         contact = "https://github.com/ajstrick81"
