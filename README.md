@@ -204,6 +204,9 @@ All patches follow the same general workflow using **Morphe Manager**:
 > the app's external files dir (`Android/data/tv.pluto.android/files/`): create **`slate_off`**
 > to disable it on-device without re-patching, or **`pluto_slate_mode`** containing `black`
 > (cover only) or `mute` (mute only) instead of the default both.
+>
+> 🔬 **How it works under the hood:** [`docs/PLUTO_TV_ATV_SYSTEM_DESIGN.md`](docs/PLUTO_TV_ATV_SYSTEM_DESIGN.md)
+> is a reverse-engineering teardown of Pluto TV's ad and playback system, and of why the patch works.
 
 ---
 
