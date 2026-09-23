@@ -49,11 +49,11 @@
  *   confirmed — update this note once results come back.
  */
 
-package app.morphe.patches.mlbtv
+package ajstrick81.morphe.patches.mlbtv
 
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.patch.bytecodePatch
-import app.morphe.patches.shared.compat.AppCompatibilities
+import ajstrick81.morphe.patches.shared.compat.AppCompatibilities
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction

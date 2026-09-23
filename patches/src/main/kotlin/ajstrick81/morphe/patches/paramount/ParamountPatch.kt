@@ -44,11 +44,11 @@
  *   slate segment coverage confirmed on-device across multiple breaks.
  */
 
-package app.morphe.patches.paramount
+package ajstrick81.morphe.patches.paramount
 
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.patch.bytecodePatch
-import app.morphe.patches.shared.compat.AppCompatibilities
+import ajstrick81.morphe.patches.shared.compat.AppCompatibilities
 
 @Suppress("unused")
 val paramountPatch = bytecodePatch(

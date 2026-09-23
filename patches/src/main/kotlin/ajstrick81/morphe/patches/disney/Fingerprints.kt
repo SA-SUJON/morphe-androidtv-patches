@@ -22,7 +22,7 @@
  *         originates (prod-frida-origin.bamgrid.com fires at +26.10s)
  */
 
-package app.morphe.patches.disney
+package ajstrick81.morphe.patches.disney
 
 import app.morphe.patcher.Fingerprint
 

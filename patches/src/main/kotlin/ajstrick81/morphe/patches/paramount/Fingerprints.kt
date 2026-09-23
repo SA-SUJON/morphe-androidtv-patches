@@ -21,7 +21,7 @@
  *     break); the chosen literal is specific enough to stay unique in-class.
  */
 
-package app.morphe.patches.paramount
+package ajstrick81.morphe.patches.paramount
 
 import app.morphe.patcher.Fingerprint
 

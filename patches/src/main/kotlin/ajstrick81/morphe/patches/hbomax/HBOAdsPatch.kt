@@ -1,8 +1,8 @@
-package app.morphe.patches.hbomax.ads
+package ajstrick81.morphe.patches.hbomax.ads
 
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.patch.bytecodePatch
-import app.morphe.patches.shared.compat.AppCompatibilities
+import ajstrick81.morphe.patches.shared.compat.AppCompatibilities
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 

@@ -36,7 +36,7 @@
  * Forked from:
  * https://gitlab.com/ReVanced/revanced-patches/-/blob/main/patches/src/main/kotlin/app/revanced/util/PatchListGenerator.kt
  */
-package app.morphe.util
+package ajstrick81.morphe.util
 
 import app.morphe.patcher.patch.AppTarget
 import app.morphe.patcher.patch.Compatibility

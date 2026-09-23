@@ -1,7 +1,7 @@
-package app.morphe.patches.espn
+package ajstrick81.morphe.patches.espn
 
 import app.morphe.patcher.patch.resourcePatch
-import app.morphe.patches.shared.compat.AppCompatibilities
+import ajstrick81.morphe.patches.shared.compat.AppCompatibilities
 import org.w3c.dom.Element
 
 // Suffix appended to the original applicationId for the cloned package, e.g.

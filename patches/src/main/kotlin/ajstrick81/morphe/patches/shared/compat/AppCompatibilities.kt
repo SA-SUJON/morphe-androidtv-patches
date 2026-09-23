@@ -1,4 +1,4 @@
-package app.morphe.patches.shared.compat
+package ajstrick81.morphe.patches.shared.compat
 
 import app.morphe.patcher.patch.AppTarget
 import app.morphe.patcher.patch.Compatibility

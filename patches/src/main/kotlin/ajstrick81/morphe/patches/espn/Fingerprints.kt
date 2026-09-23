@@ -1,4 +1,4 @@
-package app.morphe.patches.espn
+package ajstrick81.morphe.patches.espn
 
 import app.morphe.patcher.Fingerprint
 import com.android.tools.smali.dexlib2.Opcode

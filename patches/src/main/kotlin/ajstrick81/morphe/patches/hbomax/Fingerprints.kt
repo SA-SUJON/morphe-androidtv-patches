@@ -1,4 +1,4 @@
-package app.morphe.patches.hbomax.ads
+package ajstrick81.morphe.patches.hbomax.ads
 
 import app.morphe.patcher.Fingerprint
 import com.android.tools.smali.dexlib2.Opcode

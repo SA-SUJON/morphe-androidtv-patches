@@ -17,7 +17,7 @@ Android TV, then we finish the code change.**
 
 ## Why it (probably) glitches — hypothesis from the code
 
-The slate rewrite lives in `patches/src/main/kotlin/app/morphe/patches/paramount/ParamountPatch.kt`,
+The slate rewrite lives in `patches/src/main/kotlin/ajstrick81/morphe/patches/paramount/ParamountPatch.kt`,
 "Patch 3" (`AviaNetworkInterceptorFingerprint`, ~lines 127–175). Mechanism:
 
 - Live ads are Google DAI "pod serving": segment URLs shaped like

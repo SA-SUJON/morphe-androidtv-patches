@@ -1,8 +1,8 @@
-package app.morphe.patches.hbomax.ads
+package ajstrick81.morphe.patches.hbomax.ads
 
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.patch.bytecodePatch
-import app.morphe.patches.shared.compat.AppCompatibilities
+import ajstrick81.morphe.patches.shared.compat.AppCompatibilities
 
 // ─────────────────────────────────────────────────────────────────────────────
 // HBO Max — Block SSAI Ad Origins  (OPT-IN, default OFF — see RESUME 39999 note)

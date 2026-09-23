@@ -1,8 +1,8 @@
-package app.morphe.patches.disney
+package ajstrick81.morphe.patches.disney
 
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.patch.bytecodePatch
-import app.morphe.patches.shared.compat.AppCompatibilities
+import ajstrick81.morphe.patches.shared.compat.AppCompatibilities
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Suppress the Disney+ out-of-household ("Verify Household Network") prompt.

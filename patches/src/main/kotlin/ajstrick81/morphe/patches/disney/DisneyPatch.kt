@@ -12,11 +12,11 @@
  * VersionCode: 1779314460
  */
 
-package app.morphe.patches.disney
+package ajstrick81.morphe.patches.disney
 
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.patch.bytecodePatch
-import app.morphe.patches.shared.compat.AppCompatibilities
+import ajstrick81.morphe.patches.shared.compat.AppCompatibilities
 
 @Suppress("unused")
 val disneyPatch = bytecodePatch(

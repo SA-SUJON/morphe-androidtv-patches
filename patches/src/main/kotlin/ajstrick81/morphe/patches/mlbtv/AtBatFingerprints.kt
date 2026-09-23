@@ -41,7 +41,7 @@
  *   VOD type:    Lcom/google/ads/interactivemedia/v3/internal/zzafs;->zzd
  */
 
-package app.morphe.patches.mlbtv
+package ajstrick81.morphe.patches.mlbtv
 
 import app.morphe.patcher.Fingerprint
 import com.android.tools.smali.dexlib2.Opcode

@@ -1,8 +1,8 @@
-package app.morphe.patches.espn
+package ajstrick81.morphe.patches.espn
 
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.patch.bytecodePatch
-import app.morphe.patches.shared.compat.AppCompatibilities
+import ajstrick81.morphe.patches.shared.compat.AppCompatibilities
 
 // ─────────────────────────────────────────────────────────────────────────────
 // ESPN live commercial-break SLATE (the passthrough-SSAI mask).
