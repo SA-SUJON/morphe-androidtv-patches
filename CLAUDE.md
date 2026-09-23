@@ -23,3 +23,60 @@ When picking up new patching challenges (new apps, broken patches after an
 app update, anti-tamper/detection countermeasures, etc.), default to this
 mindset: explore first, question assumed limitations, and iterate rather
 than settling for the first workaround.
+
+# Repository Conventions
+
+Learned during the 2026-09 cleanup (PR #191); keep the repo this way.
+
+**Branches**
+- `main` is the only long-lived branch. Work on short-lived feature branches
+  and merge them via PR. There is no `dev` branch or prerelease channel
+  anymore; semantic-release only releases from `main`.
+- `feat`/`fix`/`perf`/`revert` commits cut a release. Use `docs`/`chore`/
+  `refactor`/`ci`/`experiment` for anything that shouldn't.
+- When a branch is abandoned, don't just let it rot. Copy any docs or
+  research worth keeping into `main`, tag the branch `archive/<branch>` and
+  delete it. `docs/archive/BRANCH_ARCHIVE.md` is the index of archived
+  branches. Add new ones there.
+- `main`'s history was rewritten on 2026-08-28. Branches or PRs older than
+  that share no ancestor with `main`, so GitHub shows them as "hundreds of
+  commits ahead" or "closed, not merged" even if their content landed.
+  Compare file contents, not commit graphs.
+
+**Code layout**
+- All patches live under one package root:
+  `patches/src/main/kotlin/ajstrick81/morphe/patches/<app>/`. All
+  extensions live under
+  `extensions/extension/src/main/java/ajstrick81/morphe/extension/<app>/`.
+  Never add new code under `app.morphe.*`. That namespace belongs to the
+  upstream Morphe libraries (`app.morphe.patcher`, `app.morphe.util`, ...),
+  which we import but don't own.
+- Morphe identifies patches by their `name`, not their class or package, so
+  moving or renaming packages is safe for users. Renaming a patch's `name`
+  is not.
+- Extension entry points that are only called from injected smali need a
+  `-keep` rule in `extensions/proguard-rules.pro`, or R8 strips them.
+
+**Native code**
+- `experimental/primevideo-libignite-native/jni/` is **production source**,
+  despite the path. CI/release compile `libpvhook.so` from it with the NDK.
+  Host unit test:
+  `g++ -std=c++17 test_remote_strip.cpp remote_strip.cpp -o t && ./t`.
+- `patches/src/main/resources/netflix/native/armeabi-v7a/libgadget.so` must
+  stay committed. It ships in the bundle.
+
+**Where research goes**
+- `docs/`: cross-app references, playbooks, handoffs, guides.
+- `experimental/<topic>/`: probes, frida scripts, prototypes and failed
+  experiments (keep a README recording what was learned). Nothing here
+  ships unless CI builds it explicitly.
+- `analysis/<app>/`: decompile and recon notes for an app.
+- `testing/`: device test harness, runbooks, capture scripts.
+- Never commit APKs or decompiled app sources (`.gitignore` covers
+  `*.apk` and `decompiled/`).
+
+**Building**
+- A local Gradle build needs a GitHub token for the Morphe GitHub Packages
+  registry (`gpr.user`/`gpr.key` or `GITHUB_ACTOR`/`GITHUB_TOKEN`). Without
+  one, push the branch and let CI build it (CI runs on every non-`main`
+  push and on PRs).
