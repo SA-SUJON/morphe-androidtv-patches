@@ -27,7 +27,8 @@ than settling for the first workaround.
 ## Why we build this: ownership
 
 > **You bought the TV. You control the TV. You own the glass.**
-> — Rory Gallagher, [lg-webos-dashboard](https://github.com/rorygallagher2024/lg-webos-dashboard) (MIT)
+> — Rory Gallagher, [lg-webos-dashboard](https://github.com/rorygallagher2024/lg-webos-dashboard) (MIT).
+> This project is inspired by and aligned with Rory's work.
 
 Growth mindset is *how* we work; ownership is *why*. Owning the device and
 paying for the service should mean the viewer decides what plays on their

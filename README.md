@@ -16,7 +16,7 @@ I'm just like you — I enjoy watching TV and movies without being bored and ann
 
 > **You bought the TV. You control the TV. You own the glass.**
 >
-> — Rory Gallagher, [lg-webos-dashboard](https://github.com/rorygallagher2024/lg-webos-dashboard) (MIT)
+> — Rory Gallagher, [lg-webos-dashboard](https://github.com/rorygallagher2024/lg-webos-dashboard) (MIT). This project is inspired by and aligned with Rory's work.
 
 That line is the reason this project exists. If you own the TV and pay for the service, what plays on your screen should be your call, not an ad network's. These patches hand that choice back to you:
 
