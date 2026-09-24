@@ -4,7 +4,10 @@
 `13.0.1 build 25028` (armeabi-v7a)*
 
 > This is the up-to-date write-up for the Netflix Android TV patch. It replaces
-> the details in the original Reddit post where they differ.
+> the details in the original Reddit post where they differ. That earlier Reddit
+> announcement is preserved, unedited, at
+> [`docs/archive/2026-07_netflix-reddit-post.md`](archive/2026-07_netflix-reddit-post.md).
+> **If those two documents ever disagree, this one is correct.**
 
 ---
 
