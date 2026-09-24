@@ -80,6 +80,19 @@ Learned during the 2026-09 cleanup (PR #191); keep the repo this way.
 - Never commit APKs or decompiled app sources (`.gitignore` covers
   `*.apk` and `decompiled/`).
 
+**Announcements & archived posts**
+- Each shipping app has a maintained current-state write-up
+  `docs/<APP>_ANNOUNCEMENT.md` (the source the Reddit post mirrors) and a full
+  teardown `docs/<APP>_ATV_SYSTEM_DESIGN.md`. The announcement is authoritative:
+  its top blockquote links the archived original and states "If those two
+  documents ever disagree, this one is correct."
+- Superseded Reddit posts are preserved verbatim under
+  `docs/archive/<YYYY-MM>_<app>-reddit-post.md` with an "ARCHIVED for
+  transparency" banner (status + why + link to the current write-up +
+  "Everything below this line is preserved verbatim"). Done for Prime Video,
+  Netflix, and Pluto TV (PRs #199/#200). Archive to preserve history; never
+  silently delete an old post.
+
 **Browsing the web (Playwright MCP)**
 - `.mcp.json` registers a `playwright` MCP server (`scripts/playwright-mcp.sh`,
   pinned `@playwright/mcp` version) so Claude can drive a real headless browser:
@@ -91,11 +104,24 @@ Learned during the 2026-09 cleanup (PR #191); keep the repo this way.
   `ERR_CERT_AUTHORITY_INVALID`. Never "fix" that with `--ignore-https-errors`.
 - A browser does **not** get around the cloud environment's network policy.
   `ERR_TUNNEL_CONNECTION_FAILED` means the policy blocked the host (e.g.
-  `apkmirror.com`, `gist.githubusercontent.com`); `github.com` pages outside
-  this repo return 403. Ask the user to allow the host in the environment's
-  Network access settings. For gists, `gist.github.com/<user>/<id>` pages are
-  reachable even by `curl` (the file text is in the page HTML), while the API
-  and `gist.githubusercontent.com` raw URLs are not.
+  `apkmirror.com`, `gist.githubusercontent.com`, `reddit.com`); `github.com`
+  pages outside this repo return 403. Ask the user to allow the host in the
+  environment's Network access settings. For gists, `gist.github.com/<user>/<id>`
+  pages are reachable even by `curl` (the file text is in the page HTML), while
+  the API and `gist.githubusercontent.com` raw URLs are not.
+- Three separate layers, don't confuse them: the **GitHub MCP** (`mcp__github__*`)
+  is GitHub API only (PRs, issues, checks, merges) and has nothing to do with
+  browsing; the **Playwright MCP** can drive a browser but is still bound by the
+  **network policy**, which is the actual gate. Fixing GitHub access does not open
+  general web access.
+- The network access level lives in the **cloud environment menu (session title
+  bar) → Edit → Network access**. `Full` allows all hosts, but the edit dialog
+  says changes **apply only to new sessions** — the current session keeps the
+  policy it started with, so a host newly allowed (or `Full` newly set) only
+  takes effect in a fresh session.
+- **Reddit is unreliable to read even when allowed** (logged-in content, API
+  friction). For refreshing Reddit posts, working from user-pasted **screenshots**
+  is the dependable path, not fetching the live post.
 
 **Diagrams**
 - For diagrams inside Markdown (docs, READMEs, gists), prefer ```` ```mermaid ````
