@@ -114,7 +114,8 @@ function parsePatches(file, text) {
       line: lineOf(text, m.index),
       name: field(args, 'name'),
       description: descMatch ? strings(descMatch[1]).join('').replace(/\s+/g, ' ').trim() : undefined,
-      default: /\buse\s*=\s*false/.test(args) ? false : undefined,
+      // Opt-in patches declare `default = false` (older style: `use = false`).
+      default: /\b(?:default|use)\s*=\s*false\b/.test(args) ? false : undefined,
       uses,
     });
   }

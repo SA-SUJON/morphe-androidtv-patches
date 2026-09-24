@@ -110,6 +110,7 @@
           "line": 41,
           "name": "Suppress Household Prompt",
           "description": "Hides the Disney+ \\\"Verify Household Network\\\" / out-of-household prompt by forcing the client's out-of-household check to report in-household, so the app routes straight to home. Does NOT change what Disney's servers detect (that's driven by your public IP — use a VPN for that); it only suppresses the on-screen prompt/routing. Opt-in / experimental; only takes visible effect when the device would otherwise be prompted.",
+          "default": false,
           "uses": [
             {
               "fingerprint": "OutOfHouseholdCheckFingerprint",
@@ -223,6 +224,7 @@
           "line": 39,
           "name": "Clone ESPN",
           "description": "Installs the patched ESPN as a separate app alongside the stock one, instead of replacing it. Enable this when ESPN is a preinstalled system app that can't be uninstalled — most commonly on Amazon Fire TV, and on some Android TV boxes and Onn devices. The clone gets its own package (suffix .$CLONE_SUFFIX), so it shows up as a second ESPN icon and keeps its own settings. Leave OFF if you were able to uninstall the original ESPN first (a normal in-place install is cleaner). Opt-in.",
+          "default": false,
           "uses": []
         },
         {
@@ -956,6 +958,7 @@
           "line": 65,
           "name": "HBO Max - Block SSAI Ad Origins",
           "description": "Reproduces the AdGuard DNS ad-block inside the app: fails media3 segment requests to HBO's SSAI ad origins (amer-free/emea-free.prd.media.max.com, gmss, FreeWheel) so the player's resiliency layer falls back to the clean, ad-free manifest — removing the stitched ad VIDEO the default Disable Ads patch leaves behind. OPT-IN: works on a fresh start, but a RESUMED session that reaches a mid-roll throws a fatal 'Couldn't Play Content' (39999) error, so it is default-off pending the upstream connection-layer fix.",
+          "default": false,
           "uses": [
             {
               "fingerprint": "DefaultHttpDataSourceOpenFingerprint",
@@ -1293,6 +1296,7 @@
           "line": 42,
           "name": "Suppress Household Prompt",
           "description": "Hides the Netflix \\\"you're traveling\\\" / update-your-household prompt by keeping the client from activating the misdetection challenge session. Does NOT change what Netflix's servers detect (that's driven by your public IP — use a VPN for that); it only suppresses the on-screen prompt. Opt-in / experimental; only takes visible effect when the account would otherwise be prompted.",
+          "default": false,
           "uses": []
         },
         {
@@ -1302,6 +1306,7 @@
           "line": 30,
           "name": "Minimize Network Fingerprint",
           "description": "Blanks the local IP / MAC / Wi-Fi SSID the Netflix app reports about your network (keeps interface name/type) and stops the app from reporting your advertising ID (GAID) in its ad-collection telemetry. Reduces network + ad fingerprinting. Does NOT stop the server-side \\\"I'm traveling\\\"/household check (that's driven by your public IP — use a VPN for that). Opt-in / experimental; test on-device.",
+          "default": false,
           "uses": []
         },
         {
@@ -1654,6 +1659,7 @@
           "line": 42,
           "name": "Clone Peacock",
           "description": "Installs the patched Peacock as a separate app alongside the stock one, instead of replacing it. Enable this when Peacock is a preinstalled system app that can't be uninstalled — most commonly on Amazon Fire TV, and on some Android TV boxes and Onn devices. The clone gets its own package (suffix .$CLONE_SUFFIX), so it shows up as a second Peacock icon and keeps its own login. Leave OFF if you were able to uninstall the original Peacock first (a normal in-place install is cleaner). Opt-in.",
+          "default": false,
           "uses": []
         },
         {
@@ -1987,6 +1993,7 @@
           "line": 42,
           "name": "Clone Pluto TV",
           "description": "Installs the patched Pluto TV as a separate app alongside the stock one, instead of replacing it. Enable this when Pluto TV is a preinstalled system app that can't be uninstalled — most commonly on Amazon Fire TV, and on some Android TV boxes and Onn devices. The clone gets its own package (suffix .$CLONE_SUFFIX), so it shows up as a second Pluto TV icon and keeps its own settings. Leave OFF if you were able to uninstall the original Pluto TV first (a normal in-place install is cleaner). Opt-in.",
+          "default": false,
           "uses": []
         },
         {
@@ -2320,6 +2327,7 @@
           "line": 48,
           "name": "Clone Prime Video",
           "description": "Renames the package to <original>.$CLONE_SUFFIX (and its provider authorities / custom permissions) so the patched app installs side-by-side with a non-removable system Prime Video. Opt-in.",
+          "default": false,
           "uses": []
         },
         {
