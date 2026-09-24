@@ -138,6 +138,9 @@ All patches follow the same general workflow using **Morphe Manager**:
 > ⚠️ **Not a subscription bypass.** You need a valid, paid Netflix account and you
 > log in normally. This only removes ads and trims device telemetry inside an app
 > you're already entitled to use.
+>
+> 🔬 **How it works under the hood:** [`docs/NETFLIX_ATV_SYSTEM_DESIGN.md`](docs/NETFLIX_ATV_SYSTEM_DESIGN.md)
+> is a reverse-engineering teardown of Netflix's ATV ad and playback system, and of why the patch works.
 
 ---
 
