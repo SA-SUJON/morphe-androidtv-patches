@@ -4,7 +4,10 @@
 `5.66.0-leanback`*
 
 > This is the up-to-date write-up for the Pluto TV Android TV patch. It replaces
-> the details in the original Reddit post where they differ.
+> the details in the original Reddit post where they differ. That earlier Reddit
+> announcement (with its 2026-07-31 update) is preserved, unedited, at
+> [`docs/archive/2026-07_pluto-tv-reddit-post.md`](archive/2026-07_pluto-tv-reddit-post.md).
+> **If those two documents ever disagree, this one is correct.**
 
 ---
 
