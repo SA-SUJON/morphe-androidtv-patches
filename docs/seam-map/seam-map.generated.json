@@ -2060,115 +2060,115 @@
             "level": "D",
             "text": "setAviaPlayer(…)",
             "file": "extensions/extension/src/main/java/ajstrick81/morphe/extension/pluto/ads/PlutoLiveSlateHelper.kt",
-            "line": 92
+            "line": 97
           },
           {
             "level": "D",
             "text": "registerActivity(…)",
             "file": "extensions/extension/src/main/java/ajstrick81/morphe/extension/pluto/ads/PlutoLiveSlateHelper.kt",
-            "line": 103
+            "line": 108
           },
           {
             "level": "D",
             "text": "live ad break -> mask ON (mode=…)",
             "file": "extensions/extension/src/main/java/ajstrick81/morphe/extension/pluto/ads/PlutoLiveSlateHelper.kt",
-            "line": 142
+            "line": 171
           },
           {
             "level": "D",
             "text": "live ad break -> mask OFF (…)",
             "file": "extensions/extension/src/main/java/ajstrick81/morphe/extension/pluto/ads/PlutoLiveSlateHelper.kt",
-            "line": 153
+            "line": 183
           },
           {
             "level": "W",
             "text": "showCover: no content root — fragment activity unavailable",
             "file": "extensions/extension/src/main/java/ajstrick81/morphe/extension/pluto/ads/PlutoLiveSlateHelper.kt",
-            "line": 159
+            "line": 189
           },
           {
             "level": "I",
             "text": "showCover: cover added to … childCount=…",
             "file": "extensions/extension/src/main/java/ajstrick81/morphe/extension/pluto/ads/PlutoLiveSlateHelper.kt",
-            "line": 177
+            "line": 207
           },
           {
             "level": "W",
             "text": "muteExo: no ExoPlayer resolved (aviaPlayer=…)",
             "file": "extensions/extension/src/main/java/ajstrick81/morphe/extension/pluto/ads/PlutoLiveSlateHelper.kt",
-            "line": 205
+            "line": 235
           },
           {
             "level": "I",
             "text": "muteExo: OK exo=… saved=… after=…",
             "file": "extensions/extension/src/main/java/ajstrick81/morphe/extension/pluto/ads/PlutoLiveSlateHelper.kt",
-            "line": 216
+            "line": 246
           },
           {
             "level": "W",
             "text": "muteExo failed on …: …",
             "file": "extensions/extension/src/main/java/ajstrick81/morphe/extension/pluto/ads/PlutoLiveSlateHelper.kt",
-            "line": 218
+            "line": 248
           },
           {
             "level": "W",
             "text": "unmuteExo failed: …",
             "file": "extensions/extension/src/main/java/ajstrick81/morphe/extension/pluto/ads/PlutoLiveSlateHelper.kt",
-            "line": 230
+            "line": 260
           },
           {
             "level": "I",
             "text": "muteStream: OK saved=… now=…",
             "file": "extensions/extension/src/main/java/ajstrick81/morphe/extension/pluto/ads/PlutoLiveSlateHelper.kt",
-            "line": 246
+            "line": 276
           },
           {
             "level": "W",
             "text": "muteStream failed: …",
             "file": "extensions/extension/src/main/java/ajstrick81/morphe/extension/pluto/ads/PlutoLiveSlateHelper.kt",
-            "line": 248
+            "line": 278
           },
           {
             "level": "I",
             "text": "unmuteStream: restored=…",
             "file": "extensions/extension/src/main/java/ajstrick81/morphe/extension/pluto/ads/PlutoLiveSlateHelper.kt",
-            "line": 258
+            "line": 288
           },
           {
             "level": "W",
             "text": "unmuteStream failed: …",
             "file": "extensions/extension/src/main/java/ajstrick81/morphe/extension/pluto/ads/PlutoLiveSlateHelper.kt",
-            "line": 260
+            "line": 290
           },
           {
             "level": "W",
             "text": "audioManager unavailable: …",
             "file": "extensions/extension/src/main/java/ajstrick81/morphe/extension/pluto/ads/PlutoLiveSlateHelper.kt",
-            "line": 272
+            "line": 302
           },
           {
             "level": "W",
             "text": "resolveExo: aviaPlayer is null (init hook never fired?)",
             "file": "extensions/extension/src/main/java/ajstrick81/morphe/extension/pluto/ads/PlutoLiveSlateHelper.kt",
-            "line": 281
+            "line": 311
           },
           {
             "level": "W",
             "text": "resolveExo: no public `player` field on …: …",
             "file": "extensions/extension/src/main/java/ajstrick81/morphe/extension/pluto/ads/PlutoLiveSlateHelper.kt",
-            "line": 290
+            "line": 320
           },
           {
             "level": "W",
             "text": "resolveExo: declaredFields = …",
             "file": "extensions/extension/src/main/java/ajstrick81/morphe/extension/pluto/ads/PlutoLiveSlateHelper.kt",
-            "line": 293
+            "line": 323
           },
           {
             "level": "W",
             "text": "contentRoot failed: …",
             "file": "extensions/extension/src/main/java/ajstrick81/morphe/extension/pluto/ads/PlutoLiveSlateHelper.kt",
-            "line": 306
+            "line": 336
           }
         ]
       },

@@ -332,11 +332,9 @@ Runtime evidence (tags `MORPHE-PCK-WV`; first 12 of 6):
 | Delivery | SSAI via Pluto's stitcher: VOD sessions carry ad breaks; live streams carry ID3 ad beacons. |
 | Code seam | VOD: `StitcherSession.getAdBreaks()` + DASH ad-period strip + beacon/pause/clickable-ad binders. Live: `ID3AdsBeaconTracker.consumeID3` as the break DETECTOR. |
 | Patch action | VOD: remove ad breaks entirely. Live: mask the break (black cover + mute), lifted when the show returns. |
-| Patch evidence | `muteStream: OK` + `muteExo: OK` + `showCover` + `live ad break -> mask ON (mode=BOTH)` ~0.1 s after the first beacon; `live ad break -> mask OFF (no ad ticks (break ended))` ~6 s after the last beacon (tag MORPHE-PLUTO-SLATE). |
-| Device signature | Live (2026-09-24 capture, 5.66.0): the app's OWN verbose log `V/ID3AdsBeaconTracker consumeID3: ID3Tag(creativeId=…, currentIndexSec=N, maximumIndexSec=30\|15, typeFlags=[…])` every ~5 s per ad; `START_OF_MEDIA` flag = ad start, `QUARTILE_END` = ad end, creativeId changes per ad. One break = 7 ads (5x30 s + 2x15 s = 180 s). A decoder re-init at the splice (~0.4 s before the first beacon). NOT a signature: resolution changes — HLS adaptive bitrate switches 720/360 all the time without ads. |
+| Patch evidence | `muteStream: OK` + `muteExo: OK` + `showCover` + `live ad break -> mask ON (mode=BOTH)` ~0.1 s after the first beacon; `live ad break -> mask OFF (last ad ended (QUARTILE_END, no next ad))` ~1.2 s after the last ad's QUARTILE_END (6.5 s no-tick fallback remains) (tag MORPHE-PLUTO-SLATE). |
+| Device signature | Live (2026-09-24 captures, 5.66.0): the app's OWN verbose log `V/ID3AdsBeaconTracker consumeID3: ID3Tag(creativeId=…, currentIndexSec=N, maximumIndexSec=30\|15, typeFlags=[…])` every ~5 s per ad; `START_OF_MEDIA` = ad start, `QUARTILE_END` = ad end, creativeId changes per ad, next ad starts 80–104 ms after the previous QUARTILE_END. A decoder re-init at each splice. NOT a signature: resolution changes — HLS adaptive bitrate switches 720/360 all the time without ads. |
 | Drift history | #144 fixed (positive ad-detect + <40% guard); #147 resume fixed; #152 live mask shipped, mute fixed v1.35.1. |
-
-**Gaps:** Mask OFF waits ~6 s for beacons to stop; the QUARTILE_END flag on the last ad could lift it on time.
 
 <details><summary>Patches and fingerprints (generated)</summary>
 
@@ -365,11 +363,11 @@ Runtime evidence (tags `MORPHE-DASH-MF`, `MORPHE-PLUTO-SLATE`; first 12 of 26):
 - E `strip failed -> original manifest (playback unaffected): ` — PlutoDashManifestProbe.java:214
 - I `resume remap (#147): original=` — PlutoDashManifestProbe.java:275
 - E `resume remap failed -> original position (resume unaffected): ` — PlutoDashManifestProbe.java:279
-- D `setAviaPlayer(…)` — PlutoLiveSlateHelper.kt:92
-- D `registerActivity(…)` — PlutoLiveSlateHelper.kt:103
-- D `live ad break -> mask ON (mode=…)` — PlutoLiveSlateHelper.kt:142
-- D `live ad break -> mask OFF (…)` — PlutoLiveSlateHelper.kt:153
-- W `showCover: no content root — fragment activity unavailable` — PlutoLiveSlateHelper.kt:159
+- D `setAviaPlayer(…)` — PlutoLiveSlateHelper.kt:97
+- D `registerActivity(…)` — PlutoLiveSlateHelper.kt:108
+- D `live ad break -> mask ON (mode=…)` — PlutoLiveSlateHelper.kt:171
+- D `live ad break -> mask OFF (…)` — PlutoLiveSlateHelper.kt:183
+- W `showCover: no content root — fragment activity unavailable` — PlutoLiveSlateHelper.kt:189
 
 </details>
 
