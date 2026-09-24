@@ -61,7 +61,7 @@ How each app delivers ads, where our patches cut in, and what proves it worked. 
 | Disney+ Android TV | `InsertionGetRangesFingerprint` | `(custom matcher)`.— | `Ljava/util/List` |  | passed to helper/list |
 | Disney+ Android TV | `DmpInsertionGetPointsFingerprint` | `(custom matcher)`.— | `Ljava/util/List` |  | passed to helper/list |
 | Disney+ Android TV | `DmpInsertionGetRangesFingerprint` | `(custom matcher)`.— | `Ljava/util/List` |  | passed to helper/list |
-| Suppress Household Prompt | `OutOfHouseholdCheckFingerprint` | `(custom matcher)`.— | `Ljava/lang/Object;` |  | addInstructions |
+| Suppress Household Prompt _(opt-in)_ | `OutOfHouseholdCheckFingerprint` | `(custom matcher)`.— | `Ljava/lang/Object;` |  | addInstructions |
 
 </details>
 
@@ -85,7 +85,7 @@ How each app delivers ads, where our patches cut in, and what proves it worked. 
 
 | Patch | Fingerprint | Class / method | Returns | Strings | Action |
 |---|---|---|---|---|---|
-| Clone ESPN | — | — | — |  |  |
+| Clone ESPN _(opt-in)_ | — | — | — |  |  |
 | Disable auto-updates | — | — | — |  |  |
 | ESPN Android TV | `InterstitialManagerInitFingerprint` | `(custom matcher)`.— | — |  | instructions `isAdDisabled` |
 | ESPN live commercial-break slate | `PlayerActivityOnResumeFingerprint` | `(custom matcher)`.— | — |  | addInstructions `invoke-static { p0 }, Lajstrick81/morphe/extension/espn/ads/EspnAdBreakOverlayHelper;` |
@@ -169,7 +169,7 @@ Runtime evidence (tags `MORPHE-ESPN-SLATE`; first 12 of 48):
 | HBO Max - Disable Ads | `SsaiInfoTimelineBuilderAccessorFingerprint` | `(custom matcher)`.— | — |  | addInstructions `return-void` |
 | HBO Max - Disable Ads | `GenerateLiveTimelineEntriesForAdBreakFingerprint` | `(custom matcher)`.— | — |  | addInstructions |
 | HBO Max - Disable Ads | `NowtilusEnabledFingerprint` | `(custom matcher)`.— | — |  | addInstructions `                 const/4 v0, 0x0                 return v0             ` |
-| HBO Max - Block SSAI Ad Origins | `DefaultHttpDataSourceOpenFingerprint` | `(custom matcher)`.— | `J` |  | addInstructions |
+| HBO Max - Block SSAI Ad Origins _(opt-in)_ | `DefaultHttpDataSourceOpenFingerprint` | `(custom matcher)`.— | `J` |  | addInstructions |
 | HBO Max - Prefer Ad-Free Stream | `GetStreamInfoFingerprint` | `(custom matcher)`.— | — |  | addInstructions |
 
 Runtime evidence (tags `HboStreamSelector`; first 12 of 2):
@@ -242,8 +242,8 @@ Runtime evidence (tags `MORPHE-MLB-ADBREAK`, `MORPHE-MLB-MANIFEST`; first 12 of 
 | Patch | Fingerprint | Class / method | Returns | Strings | Action |
 |---|---|---|---|---|---|
 | Clone Netflix | — | — | — |  |  |
-| Suppress Household Prompt | — | — | — |  |  |
-| Minimize Network Fingerprint | — | — | — |  |  |
+| Suppress Household Prompt _(opt-in)_ | — | — | — |  |  |
+| Minimize Network Fingerprint _(opt-in)_ | — | — | — |  |  |
 | Disable Netflix CertCheck | `DexGuardCertCheckFingerprint` | `(custom matcher)`.— | `V` | `CertCheck failed, crash!!!` | addInstructions `return-void` |
 | Remove Netflix ads (bundle engine) | — | — | — |  |  |
 | Remove Netflix ads (loader) | `NetflixApplicationOnCreateFingerprint` | `ninja/NetflixApplication`.`onCreate` | `V` |  | addInstructions `                 const-string v0, ` |
@@ -308,7 +308,7 @@ Runtime evidence (tags `MORPHE-MLB-ADBREAK`, `MORPHE-MLB-MANIFEST`; first 12 of 
 | Skip ads | `NativeNetworkApiConstructorFingerprint` | `(custom matcher)`.— | — |  | passed to helper/list |
 | Skip ads | `SdkRootOkHttpClientFingerprint` | — | — |  | passed to helper/list |
 | Skip ads | `NewRelicInitFingerprint` | — | — |  | passed to helper/list |
-| Clone Peacock | — | — | — |  |  |
+| Clone Peacock _(opt-in)_ | — | — | — |  |  |
 | Disable auto-updates | — | — | — |  |  |
 
 Runtime evidence (tags `MORPHE-PCK-WV`; first 12 of 6):
@@ -350,7 +350,7 @@ Runtime evidence (tags `MORPHE-PCK-WV`; first 12 of 6):
 | Skip ads | `StitcherSessionGetAdBreaksFingerprint` | `data/StitcherSession`.`getAdBreaks` | `Ljava/util/List;` |  | addInstructions |
 | Skip ads | `DashManifestParserParseFingerprint` | `manifest/DashManifestParser`.`parse` | `Landroidx/media3/exoplayer/dash/manifest/DashManifest;` |  | apply `skipAdsPatch Hook 5: no return-object in parse()` |
 | Skip ads | `AviaStartExoplayerFingerprint` | `core/AviaPlayer`.`startExoplayer` | `V` |  | apply |
-| Clone Pluto TV | — | — | — |  |  |
+| Clone Pluto TV _(opt-in)_ | — | — | — |  |  |
 | Override certificate pinning | — | — | — |  |  |
 | Disable auto-updates | — | — | — |  |  |
 
@@ -395,7 +395,7 @@ Runtime evidence (tags `MORPHE-DASH-MF`, `MORPHE-PLUTO-SLATE`; first 12 of 26):
 | Skip ads | `SetAdPlaybackStatesExo2Fingerprint` | `ads/ServerSideAdInsertionMediaSource`.`setAdPlaybackStates` | `V` |  | addInstructions |
 | Skip ads | `MetricsTransporterTransmitFingerprint` | `transport/MetricsTransporter`.`transmit` | `Lcom/amazon/minerva/client/thirdparty/transport/UploadResult;` |  | addInstructions `SUCCESS` |
 | Skip ads | `BasicNetworkPerformRequestFingerprint` | `toolbox/BasicNetwork`.`performRequest` | `Lcom/android/volley/NetworkResponse;` |  | addInstructions |
-| Clone Prime Video | — | — | — |  |  |
+| Clone Prime Video _(opt-in)_ | — | — | — |  |  |
 | Prime Video extension | — | — | — |  |  |
 | Override certificate pinning | — | — | — |  |  |
 | Disable auto-updates | — | — | — |  |  |
